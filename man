@@ -1,0 +1,151 @@
+var numberFlashCard = 0;
+var AllflashCard = {};
+var j;
+var numberEditCard;
+document.querySelector('.btn_add').addEventListener('click', setIinputUser);
+document.querySelector('.btn_allremov').addEventListener('click', removAllCard);
+document.addEventListener('click', showAndHidenAnswer);
+document.addEventListener('click', deleteCard);
+document.addEventListener('click', editCard);
+document.querySelector('.edit-card__button_1').addEventListener('click', saveEditCard)
+document.querySelector('.edit-card__button_2').addEventListener('click', cancelEditCard)
+window.addEventListener('load', loadLocalStorage)
+
+
+function setIinputUser(e) {
+    e.preventDefault();
+    let question = document.getElementById('question').value;
+    let answer = document.getElementById('answer').value;
+    if (question) {
+        if (answer) {
+            console.log(numberFlashCard)
+            AllflashCard[`question-${numberFlashCard}`] = question;
+            localStorage.setItem(`question-${numberFlashCard}`, question)
+            AllflashCard[`answer-${numberFlashCard}`] = answer;
+            localStorage.setItem(`answer-${numberFlashCard}`, answer)
+
+            creatFlashCard(AllflashCard[`question-${numberFlashCard}`], AllflashCard[`answer-${numberFlashCard}`])
+
+            numberFlashCard += 1;
+            document.querySelector('.numbers-card').innerHTML = `تعداد کارت های ثبت شده شما : ${ numberFlashCard}`
+            localStorage.setItem('numberFlashCard', `${numberFlashCard}`)
+
+
+        } else {
+            alert('.لطفا به سوال پاسخ دهید')
+        }
+    }
+
+};
+
+function creatFlashCard(Questin, Answer) {
+    var addUiFlashCard = `<div class="flash-card flash-card-${numberFlashCard}" id="flash__card">
+        <div class="flash-card__content">
+            <h4 class="flash-card__content-soal-${numberFlashCard}">${Questin}</h4>
+            <h3 id="flash-card__content-javab" class="flash-card__content-javab-${numberFlashCard}">${Answer}</h3>
+        </div>
+        <div class="flash-card__button">
+            <button class="flash-card__button-all flash-card__button-1 flash-card__button-1_${numberFlashCard}" type="button"><i class="fas fa-trash fa-lg"></i></button>
+            <button class="flash-card__button-all flash-card__button-2 flash-card__button-2_${numberFlashCard}" type="button"><i class="far fa-edit fa-lg"></i></button>
+            <button class="flash-card__button-all flash-card__button-3 flash-card__button-3_${numberFlashCard}" type="button"><i class="far fa-eye-slash fa-lg"></i></button>
+        </div>
+    </div>`;
+    document.getElementById('script').insertAdjacentHTML("beforebegin", addUiFlashCard);
+    document.querySelector(`.flash-card__content-javab-${numberFlashCard}`).style.display = 'none'
+    document.getElementById('question').value = '';
+    document.getElementById('answer').value = '';
+}
+
+function removAllCard(e) {
+    e.preventDefault();
+    numberFlashCard = 0;
+    AllflashCard = {};
+    // while( document.querySelector('.flash-card')){
+    //     document.querySelector('.flash-card').remove()
+    // } 
+    document.querySelectorAll('.flash-card').forEach(el => el.remove())
+    document.querySelector('.numbers-card').innerHTML = `تعداد کارت های ثبت شده شما : ${numberFlashCard}`
+    localStorage.clear()
+};
+
+function showAndHidenAnswer(e) {
+    e.preventDefault;
+    for (let i = 0; i < numberFlashCard; i++) {
+        let TARGET = e.target.closest(`.flash-card__button-3_${i}`);
+        if (TARGET) {
+            if (document.querySelector(`.flash-card__content-javab-${i}`).style.display == 'none') {
+                document.querySelector(`.flash-card__content-javab-${i}`).style.display = 'inline-block'
+                document.querySelector(`.flash-card__button-3_${i}`).innerHTML = '<i class="far fa-eye fa-lg"></i>'
+            } else if (document.querySelector(`.flash-card__content-javab-${i}`).style.display == 'inline-block') {
+                document.querySelector(`.flash-card__content-javab-${i}`).style.display = 'none'
+                document.querySelector(`.flash-card__button-3_${i}`).innerHTML = '<i class="far fa-eye-slash fa-lg"></i>'
+            }
+        }
+    }
+};
+
+function deleteCard(e) {
+    e.preventDefault
+        // Allflashc
+    for (let i = 0; i < numberFlashCard; i++) {
+        let TARGET = e.target.closest(`.flash-card__button-1_${i}`);
+        if (TARGET) {
+            document.querySelector(`.flash-card-${i}`).remove()
+            numberFlashCard -= 1;
+            document.querySelector('.numbers-card').innerHTML = `تعداد کارت های ثبت شده شما : ${numberFlashCard}`
+            localStorage.removeItem(`question-${i}`)
+            localStorage.removeItem(`answer-${i}`)
+            localStorage.setItem('numberFlashCard', `${numberFlashCard}`)
+        }
+    }
+
+}
+
+function editCard(e) {
+    e.preventDefault
+    for (j = 0; j < numberFlashCard; j++) {
+        let TARGET = e.target.closest(`.flash-card__button-2_${j}`);
+        if (TARGET) {
+            numberEditCard = j
+            document.querySelector('.edit-card__background').style.display = 'inline-block'
+            document.querySelector('.question_editCard').innerHTML = localStorage.getItem(`question-${j}`)
+            document.querySelector('.answer_editCard').innerHTML = localStorage.getItem(`answer-${j}`)
+        }
+    }
+}
+
+
+function saveEditCard(e) {
+    e.preventDefault;
+
+    localStorage.setItem(`question-${numberEditCard}`, document.querySelector('.question_editCard').innerHTML)
+    document.querySelector(`.flash-card__content-soal-${numberEditCard}`).innerHTML = localStorage.getItem(`question-${numberEditCard}`)
+    localStorage.setItem(`answer-${numberEditCard}`, document.querySelector('.answer_editCard').innerHTML)
+    document.querySelector(`.flash-card__content-javab-${numberEditCard}`).innerHTML = localStorage.getItem(`answer-${numberEditCard}`)
+
+    document.querySelector('.edit-card__background').style.display = 'none';
+}
+
+function cancelEditCard(e) {
+    e.preventDefault
+    document.querySelector('.edit-card__background').style.display = 'none'
+}
+
+
+function loadLocalStorage() {
+    if (parseInt(localStorage.getItem('numberFlashCard'))) {
+        var numberFlashCards = parseInt(localStorage.getItem('numberFlashCard'));
+    } else {
+        numberFlashCards = 0
+    }
+    document.querySelector('.numbers-card').innerHTML = `تعداد کارت های ثبت شده شما : ${numberFlashCards}`
+    for (let k = 0; k < parseInt(localStorage.getItem('numberFlashCard')); k++) {
+        questionLocalStorage = localStorage.getItem(`question-${k}`)
+        answerLocalStorage = localStorage.getItem(`answer-${k}`)
+        numberFlashCard = k
+        creatFlashCard(questionLocalStorage, answerLocalStorage)
+    }
+    if (numberFlashCards != 0) {
+        numberFlashCard += 1
+    }
+}
